@@ -1,0 +1,177 @@
+<div class="horizontal-flex full-height">
+  <div *ngIf="!currentPlaylist" class="article flex-item">
+    <div class="article-title">
+      <span>{{app.text('playlists', 'shop')}}</span>
+      <div class="horizontal-flex flex-item flex-end">
+        <button class="new-button" (click)="newPlaylist()">
+          {{app.text('new_playlist', 'web_music_player')}}
+        </button>
+      </div>
+    </div>
+    <div class="article-content">
+      <div class="tab-container">
+        <div *ngIf="app.data.table('music-playlist').length"
+             class="tab-content active">
+          <div *ngFor="let playlist of app.data.table('music-playlist')"
+               (click)="currentPlaylist = playlist"
+               class="animation-preview-item button">
+            <span *ngIf="playlist.name">{{playlist.name}} :</span> <span>[{{playlist.type}}]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="currentPlaylist" class="article flex-item">
+    <div class="article-title">
+      <span >{{currentPlaylist.name}} : [{{currentPlaylist.type}}]</span>
+      <div  class="horizontal-flex flex-item flex-end">
+        <button class="back-button" (click)="currentPlaylist = null;">
+          {{app.text('back', 'web_music_player')}}
+        </button>
+        <button class="edit-button"
+                [ngClass]="{active:(editPlaylist && !searchSong), inactive:(!currentPlaylist || searchSong)}"
+                (click)="editPlaylist = !editPlaylist">
+          {{app.text('edit_playlist', 'web_music_player')}}
+        </button>
+
+      </div>
+      <div class="horizontal-flex" *ngIf="!currentPlaylist">
+        <span *ngIf="currentPlaylist.name">{{currentPlaylist.name}} :</span> <span>[{{currentPlaylist.type}}]</span>
+      </div>
+    </div>
+    <div class="article-content">
+      <div class="tab-container">
+        <div class="tab-content" [ngClass]="{active:(currentPlaylist && searchSong)}">
+          <div class="box-full">
+            <div class="horizontal-flex">
+              <label>
+           <span>
+            {{app.text('search', 'web_music_player')}}
+          </span>
+                <input [(ngModel)]="searchInput"/>
+              </label>
+              <button class="btn-close" (click)="searchSong = false"></button>
+            </div>
+            <div class="horizontal-flex" *ngIf="searchSong && currentPlaylist">
+              <label *ngFor="let type of apiTypes" (click)="toggleApiType(type)">
+                <div class="checkbox" [ngClass]="{active:(apiTypeActive(type))}"></div>
+                {{app.text('api_type_' + type, 'web_music_player')}}
+              </label>
+              <button (click)="searchForSongs()">{{app.text('search', 'web_music_player')}}</button>
+            </div>
+            <div class="full-width" *ngIf="searchError">
+              {{app.text('error_' + searchError, 'web_music_player')}}
+            </div>
+            <div class="full-width" *ngIf="searchResult">
+              <div class="accordion" *ngFor="let result of searchResult"
+                   [ngClass]="{active:(app.currentAccordion === 'object')}">
+                <div class="accordion-title" (click)="app.toggleAccordion('object')">
+                  <span>{{currentPlaylist.name}} [{{currentPlaylist.type}}]</span>
+                </div>
+                <div class="accordion-content">
+                  <div class="inside">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div *ngIf="currentPlaylist && !editPlaylist && !searchSong" class="tab-content active">
+          <div class="accordion"
+               [ngClass]="{active:(app.currentAccordion === 'object')}">
+            <div class="article-title">
+
+              <span>{{app.text('product_preview', 'shop')}}</span>
+              <div class="horizontal-flex flex-item flex-end">
+                <button *ngIf="app.shop.previewProduct" class="edit-button"
+                        (click)="app.shop.currentProduct = app.shop.previewProduct"></button>
+              </div>
+
+            </div>
+            <div class="accordion-content">
+              <div class="inside">
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="currentPlaylist" class="article flex-item">
+    <div class="article-title">
+      <span>{{app.text('search', 'web_music_player')}}</span>
+      <div *ngIf="currentPlaylist" class="horizontal-flex flex-item flex-end">
+        <input class="flex-item" [(ngModel)]="searchInput"/>
+      </div>
+      <div class="horizontal-flex" *ngIf="!currentPlaylist">
+        <span *ngIf="currentPlaylist.name">{{currentPlaylist.name}} :</span> <span>[{{currentPlaylist.type}}]</span>
+      </div>
+    </div>
+    <div class="article-content">
+      <div class="tab-container">
+        <div class="horizontal-flex" *ngIf="currentPlaylist">
+          <label *ngFor="let type of apiTypes" (click)="toggleApiType(type)">
+            <div class="checkbox" [ngClass]="{active:(apiTypeActive(type))}"></div>
+            {{app.text('api_type_' + type, 'web_music_player')}}
+          </label>
+          <button (click)="searchForSongs()">{{app.text('search', 'web_music_player')}}</button>
+        </div>
+        <div class="full-width" *ngIf="searchError">
+          {{app.text('error_' + searchError, 'web_music_player')}}
+        </div>
+        <div class="full-width" *ngIf="searchResult">
+          <div class="accordion" *ngFor="let result of searchResult"
+               [ngClass]="{active:(app.currentAccordion === 'object')}">
+            <div class="accordion-title" (click)="app.toggleAccordion('object')">
+              <span>{{currentPlaylist.name}} [{{currentPlaylist.type}}]</span>
+            </div>
+            <div class="accordion-content">
+              <div class="inside">
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="popup-overlay layout-{{app.popupLayout}}" [ngClass]="{active:(editPlaylist && currentPlaylist)}">
+  <div class="popup-container" *ngIf="currentPlaylist && editPlaylist">
+    <div class="popup-header">
+      <h3>{{app.text('playlist', 'web_music_player')}}</h3>
+      <app-popup-options></app-popup-options>
+      <button class="close-button" (click)="editPlaylist = false"></button>
+    </div>
+    <div class="popup-content">
+      <label>
+           <span>
+            {{app.text('name', 'web_music_player')}}
+          </span>
+        <input [(ngModel)]="currentPlaylist.name"/>
+      </label>
+      <label>
+          <span>
+            {{app.text('type', 'web_music_player')}}
+          </span>
+      </label>
+      <label>
+          <span>
+            {{app.text('description', 'web_music_player')}}
+          </span>
+        <textarea [(ngModel)]="currentPlaylist.description"></textarea>
+      </label>
+    </div>
+    <div class="popup-footer">
+      <button class="save-button"
+              (click)="savePlaylist()"
+              [ngClass]="{inactive:(app.shop.updating)}">{{app.text('save')}}
+      </button>
+    </div>
+  </div>
+</div>
